@@ -1,19 +1,19 @@
-use std::sync::{Mutex};
+use std::sync::Mutex;
 use std::thread::sleep;
 use std::time::Duration;
-use libusb::{Device, DeviceHandle, Error};
+use rusb::{Device, DeviceHandle, Error, Context};
 
-pub struct ClaimedDevice<'a> {
-    handle: Mutex<DeviceHandle<'a>>,
+pub struct ClaimedDevice {
+    handle: Mutex<DeviceHandle<Context>>,
     interface: u8,
     read_address: u8,
     write_address: u8,
     debug: bool
 }
 
-impl<'a> ClaimedDevice<'a> {
-    pub fn claim(device: Device<'a>, interface: u8) -> Result<ClaimedDevice<'a>, Error> {
-        let mut handle = device.open().expect("Failed open");
+impl ClaimedDevice {
+    pub fn claim(device: Device<Context>, interface: u8) -> Result<ClaimedDevice, Error> {
+        let handle = device.open().expect("Failed open");
         let read_address = 0x82;
         let write_address = 0x02;
         let result = handle.detach_kernel_driver(interface).is_ok();

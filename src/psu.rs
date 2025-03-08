@@ -1,20 +1,16 @@
 use std::thread::sleep;
 use std::time::Duration;
-use libusb::Context;
+use rusb::{Context, UsbContext};
 use crate::Config;
 use crate::device::ClaimedDevice;
 use crate::encode::{decode, encode};
 
-pub struct PsuStatus {
-
-}
-
-pub struct Psu<'a> {
+pub struct Psu {
     config: Config,
-    claimed_device: ClaimedDevice<'a>
+    claimed_device: ClaimedDevice
 }
 
-impl<'a> Psu<'a> {
+impl Psu {
     pub fn setup(context: &Context, config: Config) -> Option<Psu> {
         for device in context.devices().unwrap().iter() {
             let device_desc = device.device_descriptor().unwrap();
@@ -27,6 +23,7 @@ impl<'a> Psu<'a> {
                 for interface in configd.interfaces() {
                     println!("Device interface {:?}", interface.number());
                 }
+                // Use device directly without transmutation
                 let claimed_device = ClaimedDevice::claim(device, 0x00).expect("Claiming device failed");
                 claimed_device.write_control();
                 return Some(Psu { config, claimed_device });

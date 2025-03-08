@@ -3,14 +3,14 @@ mod psu;
 mod encode;
 
 extern crate rand;
-extern crate libusb;
+extern crate rusb;  // Replace libusb with rusb
 extern crate crc;
 
 use std::env;
 use std::u8;
 use crate::psu::Psu;
 
-fn print_endpoint(endpoint: libusb::EndpointDescriptor) {
+fn print_endpoint(endpoint: rusb::EndpointDescriptor) {
     println!("Endpoint address {:02x}", endpoint.address());
     println!("Endpoint number {:02x}", endpoint.number());
     println!("Endpoint direction {:?}", endpoint.direction());
@@ -20,7 +20,7 @@ fn print_endpoint(endpoint: libusb::EndpointDescriptor) {
     println!("Endpoint packet size {}", endpoint.max_packet_size());
 }
 
-fn print_device(device: &libusb::Device) {
+fn print_device(device: &rusb::Device<rusb::GlobalContext>) {
     let device_desc = device.device_descriptor().unwrap();
     println!("Bus {:03} Device {:03} ID {:04x}:{:04x}",
              device.bus_number(),
@@ -71,7 +71,7 @@ fn main() {
         config.fan_percent = Some(args.get(1).unwrap().parse::<u8>().unwrap());
     }
 
-    let context = libusb::Context::new().unwrap();
+    let context = rusb::Context::new().unwrap();
     let mut device = Psu::setup(&context, config.clone()).unwrap();
     device.setup_dongle();
     device.print_status();
