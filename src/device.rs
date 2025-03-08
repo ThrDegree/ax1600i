@@ -49,7 +49,7 @@ impl ClaimedDevice {
     }
 
     pub fn release(&mut self) {
-        let mut locked_handle = self.handle.lock().unwrap();
+        let locked_handle = self.handle.lock().unwrap();
         locked_handle.release_interface(self.interface).expect("Release interface failed");
     }
 }
